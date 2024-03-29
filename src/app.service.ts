@@ -62,12 +62,12 @@ export class AppService {
         if (file.mimetype.includes('html')) {
           html = file;
         } else {
-          const tempName = `${Date.now}-${file.originalname}`;
-          await writeFile(`./${tempName}`, file.buffer);
-          const fileData = await readFile(`./${tempName}`);
+          // const tempName = `${Date.now}-${file.originalname}`;
+          // await writeFile(`./${tempName}`, file.buffer);
+          // const fileData = await readFile(`./${tempName}`);
           attachments.push({
             filename: file.originalname,
-            content: fileData,
+            content: file.buffer,
           });
         }
       }
