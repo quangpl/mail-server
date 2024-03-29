@@ -8,20 +8,16 @@ export type MailDocument = HydratedDocument<Mail>;
 export class Mail {
   @Prop()
   to: string[];
-
   @Prop()
   from: string;
   @Prop()
   sender: string;
   @Prop()
   subject: string;
-
   @Prop()
   text: string;
   @Prop()
-  html: Buffer;
-  @Prop()
-  priority: string;
+  time: number;
 }
 
 export const MailSchema = SchemaFactory.createForClass(Mail);
