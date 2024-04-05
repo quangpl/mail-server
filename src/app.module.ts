@@ -9,7 +9,8 @@ config();
 @Module({
   imports: [
     MongooseModule.forRoot(
-      process.env.MONGO_URI || 'mongodb://localhost/mail_system',
+      process.env.MONGO_URI ||
+        'mongodb://root:example@localhost:27017/mail_system?authMechanism=DEFAULT&authSource=admin',
     ),
     MongooseModule.forFeature([{ name: Mail.name, schema: MailSchema }]),
   ],
