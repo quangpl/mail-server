@@ -56,25 +56,17 @@ export class AppService {
     }
 
     try {
-      let html: any = {};
       const attachments = [];
       for (const file of files) {
-        if (file.mimetype.includes('html')) {
-          html = file;
-        } else {
-          // const tempName = `${Date.now}-${file.originalname}`;
-          // await writeFile(`./${tempName}`, file.buffer);
-          // const fileData = await readFile(`./${tempName}`);
-          attachments.push({
-            filename: file.originalname,
-            content: file.buffer,
-          });
-        }
+        attachments.push({
+          filename: file.originalname,
+          content: file.buffer,
+        });
       }
       const info = await transporter.sendMail({
         ...options,
         from: process.env.AWS_EMAIL || 'system@vnucfs.com',
-        html: html.buffer,
+        html: options.html,
         attachments,
       });
       console.log(info);
