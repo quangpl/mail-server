@@ -6,9 +6,8 @@ import { config } from 'dotenv';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Mail } from './schemas';
-import { writeFile, readFile } from 'fs/promises';
 config();
-
+const LIMIT_MAIL = 50;
 @Injectable()
 export class AppService {
   constructor(@InjectModel(Mail.name) private mailModel: Model<Mail>) {}
@@ -29,6 +28,9 @@ export class AppService {
   }
 
   async sendEmail(options: Mailer.Options, files: Array<Express.Multer.File>) {
+    console.log(options);
+    options.to = JSON.parse(options.to as any);
+
     //TODO: temp solution, need to pass config file instead.
     const ses = new aws.SES({
       apiVersion: '2010-12-01',
@@ -63,13 +65,19 @@ export class AppService {
           content: file.buffer,
         });
       }
-      const info = await transporter.sendMail({
-        ...options,
-        from: process.env.AWS_EMAIL || 'system@vnucfs.com',
-        html: options.html,
-        attachments,
-      });
-      console.log(info);
+
+      for (let i = 0; i < (options.to as any[]).length; i = i + LIMIT_MAIL) {
+        console.log((options.to as string[]).slice(i, i + LIMIT_MAIL));
+        const info = await transporter.sendMail({
+          ...options,
+          from: process.env.AWS_EMAIL || 'system@vnucfs.com',
+          html: options.html,
+          attachments,
+          to: (options.to as string[]).slice(i, i + LIMIT_MAIL),
+        });
+        console.log(info);
+        await new Promise((r) => setTimeout(r, 4000));
+      }
       await this.mailModel.create({
         to: options.to,
         from: options.from,
@@ -79,7 +87,7 @@ export class AppService {
         html: options.html,
         time: Date.now(),
       });
-      console.log(`Sent email successfully ${JSON.stringify(info.messageId)}`);
+      console.log(`Sent email successfully`);
     } catch (err) {
       console.error(`Cannot send email with reason ${JSON.stringify(err)}`);
     }
